@@ -85,5 +85,5 @@ if __name__ == "__main__":
             print "Must pass a value > 0: %d" % times
             _sys.exit(0)
     else:
-        print "Running FOR-EV-ER!!!!! Ctrl+C to Stop"
+        print "Running every %d seconds FOR-EV-ER!!!!! Ctrl+C to Stop" % WAIT_TIME_IN_SEC
         loop_tester(100000000)
