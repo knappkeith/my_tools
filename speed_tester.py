@@ -1,3 +1,5 @@
+#! /usr/bin/env python
+
 from selenium.webdriver import PhantomJS as JS
 import time
 import datetime
@@ -32,35 +34,48 @@ def loop_tester(num_runs):
     print_results(records)
 
 def speed_tester():
-    a = JS()
-    a.get(URL_TO_SPEED_TEST)
-    st = a.find_element_by_id("speedo-start")
-    up = a.find_element_by_id("speedo-up")
-    dw = a.find_element_by_id("speedo-down")
+    speed_driver = JS()
+    speed_driver.get(URL_TO_SPEED_TEST)
+    start_button = speed_driver.find_element_by_id("speedo-start")
+    up_speed = speed_driver.find_element_by_id("speedo-up")
+    down_speed = speed_driver.find_element_by_id("speedo-down")
+    ping_time = speed_driver.find_element_by_id("speedo-ping")
+    ip_address = speed_driver.find_element_by_id("speedo-ip")
+    provider = speed_driver.find_element_by_id("speedo-provider")
+    selected_server = speed_driver.find_element_by_id("speedo-server")
 
-    st.click()
+    start_button.click()
 
-    while st.get_attribute("class") == "testing":
+    while start_button.get_attribute("class") == "testing":
         time.sleep(1)
-    while up.text == "--.--":
+    while up_speed.text == "--.--":
         time.sleep(1)
-    while dw.text == "--.--":
+    while down_speed.text == "--.--":
         time.sleep(1)
 
     record = {
-        "upSpeed": up.text,
-        "dwSpeed": dw.text,
-        "time": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        "upSpeed": up_speed.text,
+        "dwSpeed": down_speed.text,
+        "pingTime": ping_time.text,
+        "time": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "ipAddress": ip_address.text,
+        "provider": provider.text,
+        "selectServer": selected_server.text
     }
-    a.quit()
+    speed_driver.quit()
     return record
 
 def print_results(records):
-    print ""
-    print "JSON Blob:"
-    print json.dumps(records, indent=2)
-    print ""
-    process_results(records)
+    if len(records) > 0:
+        answer = raw_input("Print JSON Blob(Y/N)? ")
+        if answer.upper() in ["YES", "Y"]:
+            print ""
+            print "JSON Blob:"
+            print json.dumps(records, indent=2)
+        print ""
+        process_results(records)
+    else:
+        print "No Records to process!!"
 
 def process_results(records):
     total_up = [float(i['upSpeed']) for i in records]
