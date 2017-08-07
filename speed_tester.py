@@ -14,16 +14,17 @@ URL_TO_SPEED_TEST = "http://www.bandwidthplace.com/"
 def loop_tester(num_runs):
     records = []
     try:
-        record = speed_tester()
+        js_driver = JS()
+        record = speed_tester(speed_driver=js_driver)
         records.append(record)
         print "Up: %s, Down: %s, Time: %s" % (
             record['upSpeed'], record['dwSpeed'], record['time'])
         for i in range(0, num_runs - 1):
             time.sleep(WAIT_TIME_IN_SEC)
-            record = speed_tester()
+            record = speed_tester(speed_driver=js_driver)
             records.append(record)
-            print "Up: %s, Down: %s, Time: %s" % (
-                record['upSpeed'], record['dwSpeed'], record['time'])
+            print "Up: {x[upSpeed]:>6}, Down: {x[dwSpeed]:>6}, Time: {x[time]}".format(x=record)
+            
     except KeyboardInterrupt:
         print ""
         print "Stopping execution, Results:"
@@ -32,9 +33,9 @@ def loop_tester(num_runs):
     print ""
     print "Results:"
     print_results(records)
+    js_driver.quit()
 
-def speed_tester():
-    speed_driver = JS()
+def speed_tester(speed_driver):
     speed_driver.get(URL_TO_SPEED_TEST)
     start_button = speed_driver.find_element_by_id("speedo-start")
     up_speed = speed_driver.find_element_by_id("speedo-up")
@@ -53,6 +54,9 @@ def speed_tester():
     while down_speed.text == "--.--":
         time.sleep(1)
 
+    # Wait for the flashing to stop
+    time.sleep(5)
+
     record = {
         "upSpeed": up_speed.text,
         "dwSpeed": down_speed.text,
@@ -62,7 +66,6 @@ def speed_tester():
         "provider": provider.text,
         "selectServer": selected_server.text
     }
-    speed_driver.quit()
     return record
 
 def print_results(records):
